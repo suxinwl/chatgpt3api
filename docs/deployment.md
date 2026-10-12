@@ -64,6 +64,16 @@ curl -fsSL https://raw.githubusercontent.com/suxinwl/chatgpt3api/main/deploy/ins
 
 选择本地 PostgreSQL 时，脚本会自动生成并保存数据库密码，下载 `docker-compose.postgres.yml`，再与主 Compose 一起启动。重复运行安装脚本会复用已有密码。`CHATGPT2API_THREAD_TOKENS` 默认是 `120`，表示后端同步工作线程的并发容量，只要求正整数且不设置人为最高值；账号、代理和上游服务仍分别执行自己的并发限制。
 
+## 国内服务器的代理出口
+
+在控制台“代理管理”设置默认出口，并让上游账号使用默认代理；需要单独路由的账号可选择自定义代理或代理组。Codex 生图和图片编辑也使用当前图片请求已选定的出口，无需另设代理配置。
+
+可直接填写 HTTP、HTTPS、SOCKS5 或 SOCKS5H 地址，例如 `socks5h://用户名:密码@代理服务器:端口`。密码含 URL 保留字符时需编码。SOCKS5 会规范化为 SOCKS5H，由代理解析目标域名。TUIC、Hysteria2、VLESS 节点需先通过 Mihomo 等客户端提供 HTTP/SOCKS5 端口，平台不直接导入 Clash YAML。
+
+若 Mihomo 作为同一 Compose 网络中的 `mihomo` 服务运行，平台代理地址可填写 `http://mihomo:7890`。Mihomo 需允许其他容器访问监听端口，7890 不必映射到公网。独立容器中的 `127.0.0.1` 指向该容器自身。
+
+应用出口设置不影响 Docker 守护进程拉取 GHCR 镜像；无法拉取镜像时需单独检查服务器到 GHCR 的连接。
+
 ## 本地开发
 
 后端：
@@ -170,6 +180,6 @@ docker compose down
 
 ## 发布镜像
 
-`.github/workflows/docker-publish.yml` 在推送 `v*` 标签时，先校验标签与各处项目版本一致并编译后端、构建前端，再发布在线更新包及 amd64 / arm64 镜像。`main` 推送不会触发发布。`v3.2.4` 对应镜像标签 `latest`、`v3.2.4`、`3.2.4` 和 `3.2`。
+`.github/workflows/docker-publish.yml` 在推送 `v*` 标签时，先校验标签与各处项目版本一致并编译后端、构建前端，再发布在线更新包及 amd64 / arm64 镜像。`main` 推送不会触发发布。`v3.2.6` 对应镜像标签 `latest`、`v3.2.6`、`3.2.6` 和 `3.2`。
 
 首次发布后，仓库所有者需在 GitHub 的 `chatgpt3api` Package settings 中将可见性设置为 Public，服务器才能匿名拉取；未公开时需使用具有 `read:packages` 权限的凭据登录 GHCR。参见 [GitHub Container registry 文档](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)。在线更新使用本仓库的 GitHub Release。

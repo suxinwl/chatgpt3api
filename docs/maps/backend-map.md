@@ -50,6 +50,15 @@ image model remain unchanged. The catalog's additive
 `capabilities.image_model_notes` projects this limitation for the selected
 image model; Studio renders the backend-provided note.
 
+`OpenAIBackendAPI.iter_codex_image_response_events` uses `curl_cffi` with the
+`ProxyRuntimeProfile` already selected for the Image Attempt. It does not
+reselect a Proxy Group node or reserve another image slot. Codex retains its
+minimal request headers while honoring the selected HTTP/HTTPS/SOCKS5H egress
+and TLS policy. Explicit direct routing disables environment proxies; selected
+proxy routing is not bypassed by `NO_PROXY`. The transport bounds the entire
+transfer, and the existing SSE parser, JSON results, structured upstream errors,
+and response/session cleanup remain in the same backend Module.
+
 ## Domain and persistence ownership
 
 | Domain | Owning Module | Stable Interface/output | Persistence |
