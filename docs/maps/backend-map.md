@@ -23,9 +23,19 @@ second implementation of service state transitions.
 
 ### Model catalog and image compatibility
 
-`ModelCatalogService` defaults chat models to `gpt-5.6` and `auto` and retains
-explicit configured overrides. The console and `/v1/models` consume the same
-catalog; listing models does not query upstream or append upstream-only entries.
+`ModelCatalogService` uses explicit configured chat models first, then the
+ordered union of selectable Web accounts' `available_models` and
+`default_model_slug`, including `auto`. It falls back to `gpt-5.6` and `auto`
+when no account model metadata is available. The console and `/v1/models`
+consume the same projection. Listing models performs no upstream requests.
+
+`OpenAIBackendAPI.get_user_info` discovers models during account synchronization,
+with a ten-second budget shared by bootstrap and the models request. Discovery
+failure does not fail the account/quota check or erase its last successful model
+snapshot. `AccountService` normalizes and persists that metadata with the existing
+account mutation, including full exports. Text protocols pass the selected Web
+identifier unchanged and prefer selectable accounts advertising that identifier;
+legacy selection remains available when no candidate advertises it.
 
 `utils.helper.WEB_IMAGE_MODELS` owns the built-in Web image identifiers:
 `gpt-image-2`, `gpt-image-2.5`, `gpt-image-2.5-flare`, and
@@ -36,7 +46,9 @@ takes precedence over the built-in list. No `exact` aliases are added.
 The 2.5 identifiers use the existing `auto` upstream Web model slug. They are
 compatibility names and do not force a particular official API image engine or
 quality entitlement. Existing `gpt-image-2` and Codex routing and the default
-image model remain unchanged.
+image model remain unchanged. The catalog's additive
+`capabilities.image_model_notes` projects this limitation for the selected
+image model; Studio renders the backend-provided note.
 
 ## Domain and persistence ownership
 

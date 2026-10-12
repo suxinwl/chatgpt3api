@@ -29,7 +29,9 @@ requirements may move to `archive/` after links and this index are updated.
 
 ## Active requirements
 
-No active PRDs are currently tracked.
+| Requirement | Status |
+| --- | --- |
+| [0001: Discover current ChatGPT models](0001-discover-chatgpt-models.md) | pending-verification |
 
 PRDs are planning evidence, never proof that the product already behaves as
 described.

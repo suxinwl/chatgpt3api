@@ -95,6 +95,22 @@ def _image_models_from_accounts(accounts: list[dict[str, Any]]) -> list[str]:
     return models
 
 
+def _chat_models_from_accounts(accounts: list[dict[str, Any]]) -> list[str]:
+    models: list[str] = []
+    for account in accounts:
+        if not account_service._is_account_selectable(
+            account, allow_limited=True, allow_image_pending=True,
+        ) or account_service._normalize_source_type(account.get("source_type")) != "web":
+            continue
+        for model in _normalize_list(account.get("available_models")):
+            if model not in models:
+                models.append(model)
+        default_model = str(account.get("default_model_slug") or "").strip()
+        if default_model and default_model not in models:
+            models.append(default_model)
+    return _unique(["auto", *models]) if models else []
+
+
 def _unique(values: list[str]) -> list[str]:
     return list(dict.fromkeys(values))
 
@@ -120,15 +136,17 @@ class ModelCatalogService:
         settings = config.get()
         configured_chat_models = _configured_chat_models(settings)
         configured_image_models = _configured_image_models(settings)
+        accounts = account_service.list_accounts() if not configured_chat_models or not configured_image_models else []
 
-        chat_source = "config" if configured_chat_models else "fallback"
-        chat_models = _unique(configured_chat_models or list(FALLBACK_CHAT_MODELS))
+        account_chat_models = _chat_models_from_accounts(accounts) if not configured_chat_models else []
+        chat_source = "config" if configured_chat_models else "accounts" if account_chat_models else "fallback"
+        chat_models = _unique(configured_chat_models or account_chat_models or list(FALLBACK_CHAT_MODELS))
 
         if configured_image_models:
             image_source = "config"
             image_models = _unique(configured_image_models)
         else:
-            account_models = _image_models_from_accounts(account_service.list_accounts())
+            account_models = _image_models_from_accounts(accounts)
             image_source = "accounts" if account_models else "fallback"
             image_models = _unique(account_models or list(FALLBACK_IMAGE_MODELS))
 
@@ -145,6 +163,10 @@ class ModelCatalogService:
         capabilities = {
             "image_upscale": bool(settings.get("image_upscale_enabled")),
             "high_resolution_image_models": high_resolution_models,
+            "image_model_notes": {
+                model: "通过 ChatGPT 官网自动路由生图，实际引擎由官网和账号权限决定，不能强制指定 Flare 或 Sunburst。"
+                for model in WEB_IMAGE_MODELS[1:] if model in image_models
+            },
         }
         source = {"chat": chat_source, "image": image_source}
         revision_payload = {
@@ -165,6 +187,7 @@ class ModelCatalogService:
             capabilities=ModelCatalogCapabilities(
                 image_upscale=capabilities["image_upscale"],
                 high_resolution_image_models=tuple(high_resolution_models),
+                image_model_notes=capabilities["image_model_notes"],
             ),
             source=ModelCatalogSource(**source),
         )

@@ -1092,8 +1092,8 @@ def _remember_text_account(backend: OpenAIBackendAPI, access_token: str) -> str:
     return email
 
 
-def text_backend() -> OpenAIBackendAPI:
-    access_token = account_service.get_text_access_token()
+def text_backend(model: str = "") -> OpenAIBackendAPI:
+    access_token = account_service.get_text_access_token(model=model)
     backend = OpenAIBackendAPI(access_token=access_token)
     _remember_text_account(backend, access_token)
     return backend
@@ -1156,7 +1156,7 @@ def stream_text_deltas(backend: OpenAIBackendAPI, request: ConversationRequest) 
                     })
                 auth_failures += 1
             if auth_failure and not emitted and auth_failures < 2:
-                token = account_service.get_text_access_token(attempted_tokens)
+                token = account_service.get_text_access_token(attempted_tokens, model=request.model)
                 if token:
                     continue
             if token and not getattr(exc, "account_email", ""):

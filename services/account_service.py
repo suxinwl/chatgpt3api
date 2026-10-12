@@ -1038,6 +1038,13 @@ class AccountService:
             normalized["image_quota_unknown"] = False
         normalized["limits_progress"] = limits_progress
         normalized["default_model_slug"] = normalized.get("default_model_slug") or None
+        raw_models = normalized.get("available_models")
+        if isinstance(raw_models, list):
+            normalized["available_models"] = list(dict.fromkeys(
+                model.strip() for model in raw_models if isinstance(model, str) and model.strip()
+            ))
+        else:
+            normalized.pop("available_models", None)
         if derived_restore_at and not normalized.get("restore_at"):
             normalized["restore_at"] = derived_restore_at
         normalized["restore_at"] = normalized.get("restore_at") or None
@@ -2089,7 +2096,9 @@ class AccountService:
             f"no image account available after {len(attempted_tokens)} attempts",
         )
 
-    def get_text_access_token(self, excluded_tokens: set[str] | None = None) -> str:
+    def get_text_access_token(
+        self, excluded_tokens: set[str] | None = None, *, model: str = "",
+    ) -> str:
         self._refresh_accounts_snapshot_if_stale()
         attempted = set(excluded_tokens or set())
         while True:
@@ -2107,6 +2116,15 @@ class AccountService:
                 ]
                 if not candidates:
                     return ""
+                matching = [
+                    token for token in candidates
+                    if model and model != "auto" and (
+                        model in self._accounts[token].get("available_models", [])
+                        or model == self._accounts[token].get("default_model_slug")
+                    )
+                ]
+                if matching:
+                    candidates = matching
                 access_token = candidates[self._index % len(candidates)]
                 self._index += 1
             attempted.add(access_token)
@@ -4930,6 +4948,7 @@ class AccountService:
                     "image_quota_unknown",
                     "limits_progress",
                     "default_model_slug",
+                    "available_models",
                     "email",
                     "user_id",
                     "account_id",

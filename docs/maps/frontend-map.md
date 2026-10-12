@@ -72,6 +72,12 @@ and is tested, committed, and released separately.
 
 ## Studio history and Gallery image recovery
 
+`useModelCatalog.ts` transports and caches the shared backend catalog.
+`studioModelFormRuntime.ts` owns model selection, including newly discovered
+Web identifiers, and exposes the selected model's backend-provided
+`capabilities.image_model_notes` to `StudioComposer.vue`. The composer renders
+the note without deriving model routing or entitlements in the browser.
+
 `studioConversationState.ts` owns serialization and browser storage for Studio
 history. It saves the complete conversation and message arrays in IndexedDB
 (`chatgpt2api-studio`, `conversations`, `history`), including reference images

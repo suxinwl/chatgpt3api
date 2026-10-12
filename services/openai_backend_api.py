@@ -563,11 +563,16 @@ class OpenAIBackendAPI:
         """获取当前 token 的账号信息。"""
         if not self.access_token:
             raise RuntimeError("access_token is required")
-        executor = ThreadPoolExecutor(max_workers=3)
+        executor = ThreadPoolExecutor(max_workers=4)
         try:
             me_future = executor.submit(self._get_me)
             init_future = executor.submit(self._get_conversation_init)
             account_future = executor.submit(self._get_default_account)
+            models_future = (
+                executor.submit(self.list_models, timeout_secs=10.0)
+                if account_service._normalize_source_type(self.account.get("source_type")) == "web"
+                else None
+            )
             results = []
             errors = []
             for future in (me_future, init_future, account_future):
@@ -587,6 +592,13 @@ class OpenAIBackendAPI:
                 raise auth_error or errors[0]
 
             me_payload, init_payload, default_account = results
+            available_models = None
+            if models_future is not None:
+                try:
+                    available_models = [item["id"] for item in models_future.result()["data"]]
+                except Exception:
+                    # Model discovery must not invalidate a successful quota/auth check.
+                    logger.debug({"event": "backend_model_discovery_unavailable"})
         except (KeyboardInterrupt, SystemExit):
             executor.shutdown(wait=False, cancel_futures=True)
             raise
@@ -613,6 +625,8 @@ class OpenAIBackendAPI:
         }
         if plan_type:
             result["type"] = plan_type
+        if available_models:
+            result["available_models"] = available_models
         logger.debug({
             "event": "backend_user_info_result",
             "email": result.get("email"),
@@ -3732,9 +3746,13 @@ class OpenAIBackendAPI:
             return "/backend-api/conversation", "Asia/Shanghai"
         return "/backend-anon/conversation", "America/Los_Angeles"
 
-    def list_models(self) -> Dict[str, Any]:
+    def list_models(self, *, timeout_secs: float = 30.0) -> Dict[str, Any]:
         """返回当前模式下可用模型，格式对齐 OpenAI `/v1/models`。"""
-        self._bootstrap()
+        deadline = time.monotonic() + max(0.1, float(timeout_secs))
+        self._bootstrap(timeout_secs=max(0.1, deadline - time.monotonic()))
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("model discovery timed out")
         path = "/backend-api/models?history_and_training_disabled=false" if self.access_token else (
             "/backend-anon/models?iim=false&is_gizmo=false"
         )
@@ -3743,7 +3761,7 @@ class OpenAIBackendAPI:
         response = self.session.get(
             self.base_url + path,
             headers=self._headers(route),
-            timeout=30,
+            timeout=remaining,
         )
         ensure_ok(response, context)
         data = []

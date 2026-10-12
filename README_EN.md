@@ -141,7 +141,7 @@ Authorization: Bearer <auth-key>
 
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
-| `/v1/models` | `GET` | Returns the shared console model catalog; default chat models are `gpt-5.6` and `auto` |
+| `/v1/models` | `GET` | Returns the shared console model catalog, discovering chat models from synchronized Web accounts with configured overrides |
 | `/v1/chat/completions` | `POST` | Chat Completions entry point for text, search, and image scenarios |
 | `/v1/responses` | `POST` | Responses entry point with text, search, and image tools |
 | `/v1/messages` | `POST` | Anthropic Messages-compatible entry point |
@@ -163,7 +163,7 @@ Creating, querying, and deleting file tasks is isolated by API key. The `/files/
 curl http://localhost:3000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <auth-key>" \
-  -d '{"model":"gpt-5","messages":[{"role":"user","content":"Introduce this project"}],"stream":true}'
+  -d '{"model":"auto","messages":[{"role":"user","content":"Introduce this project"}],"stream":true}'
 ```
 
 </details>
@@ -181,6 +181,10 @@ curl http://localhost:3000/v1/images/generations \
 </details>
 
 Available models depend on the upstream accounts and the current `/v1/models` response.
+
+Adding or synchronizing a Web account discovers the exact ChatGPT chat model identifiers. If discovery is unavailable, its default model is used; `gpt-5.6` and `auto` remain the fallback when neither is available. Explicit catalog configuration takes precedence.
+
+Images support `gpt-image-2`, `gpt-image-2.5`, `gpt-image-2.5-flare`, and `gpt-image-2.5-sunburst`. The 2.5 identifiers use the ChatGPT Web `auto` route for generation and editing. The actual engine depends on ChatGPT and account entitlements; these names cannot force Flare or Sunburst. Official API model names are not interchangeable with Web model identifiers.
 
 ## Configuration
 

@@ -115,6 +115,7 @@
             :chat-model-options="chatModelOptions"
             :image-model-options="imageModelOptions"
             :image-high-resolution-enabled="imageHighResolutionEnabled"
+            :image-model-note="modelFormRuntime.imageModelNote.value"
             :references="referenceRuntime.references.value"
             :is-sending="isSending"
             :is-streaming="isStreaming"
