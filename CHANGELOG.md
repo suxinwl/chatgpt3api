@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.2.7 - 2026-11-10
+
++ [新增] Python 图片接口、共享模型目录和 Studio 支持 `gpt-image-2.6-flare` 与 `gpt-image-2.6-sunburst`，沿用 ChatGPT Web 的 `auto` 路由。
+
 ## 3.2.6 - 2026-10-13
 
 + [修复] Codex 生图与图片编辑使用当前请求已选定的平台代理出口，支持 HTTP、HTTPS 和 SOCKS5 远程 DNS；保留强制直连、流式超时、上游错误与连接释放处理。

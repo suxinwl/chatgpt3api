@@ -199,7 +199,7 @@ curl http://localhost:3000/v1/images/generations \
 
 添加或同步 Web 账号后，控制台会显示官网返回的聊天模型标识；新型号无需修改前端列表。未取得模型目录时使用账号默认型号，均不可用时回退到 `gpt-5.6`、`auto`。手动设置的模型目录优先。
 
-图片支持 `gpt-image-2`、`gpt-image-2.5`、`gpt-image-2.5-flare` 和 `gpt-image-2.5-sunburst`。2.5 系列通过 ChatGPT 官网 `auto` 路由兼容生成与编辑，实际引擎由官网和账号权限决定，不能强制指定 Flare 或 Sunburst；官方 API 模型名称不等于官网模型标识。
+图片支持 `gpt-image-2`、`gpt-image-2.5`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`、`gpt-image-2.6-flare` 和 `gpt-image-2.6-sunburst`。2.5 和 2.6 系列通过 ChatGPT 官网 `auto` 路由兼容生成与编辑，实际引擎、能力和权限由官网与账号决定，不能仅凭兼容标识强制指定 Flare 或 Sunburst；官方 API 模型名称不等于官网模型标识。
 
 ## 关键配置
 

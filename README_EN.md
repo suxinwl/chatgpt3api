@@ -184,7 +184,7 @@ Available models depend on the upstream accounts and the current `/v1/models` re
 
 Adding or synchronizing a Web account discovers the exact ChatGPT chat model identifiers. If discovery is unavailable, its default model is used; `gpt-5.6` and `auto` remain the fallback when neither is available. Explicit catalog configuration takes precedence.
 
-Images support `gpt-image-2`, `gpt-image-2.5`, `gpt-image-2.5-flare`, and `gpt-image-2.5-sunburst`. The 2.5 identifiers use the ChatGPT Web `auto` route for generation and editing. The actual engine depends on ChatGPT and account entitlements; these names cannot force Flare or Sunburst. Official API model names are not interchangeable with Web model identifiers.
+Images support `gpt-image-2`, `gpt-image-2.5`, `gpt-image-2.5-flare`, `gpt-image-2.5-sunburst`, `gpt-image-2.6-flare`, and `gpt-image-2.6-sunburst`. The 2.5 and 2.6 identifiers use the ChatGPT Web `auto` route for generation and editing. The actual engine, capabilities, and entitlements depend on ChatGPT and the account; a compatibility identifier alone cannot force Flare or Sunburst. Official API model names are not interchangeable with Web model identifiers.
 
 ## Configuration
 

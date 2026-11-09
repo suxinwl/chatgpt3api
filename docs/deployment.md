@@ -180,6 +180,6 @@ docker compose down
 
 ## 发布镜像
 
-`.github/workflows/docker-publish.yml` 在推送 `v*` 标签时，先校验标签与各处项目版本一致并编译后端、构建前端，再发布在线更新包及 amd64 / arm64 镜像。`main` 推送不会触发发布。`v3.2.6` 对应镜像标签 `latest`、`v3.2.6`、`3.2.6` 和 `3.2`。
+`.github/workflows/docker-publish.yml` 在推送 `v*` 标签时，先校验标签与各处项目版本一致并编译后端、构建前端，再发布在线更新包及 amd64 / arm64 镜像。`main` 推送不会触发发布。`v3.2.7` 对应镜像标签 `latest`、`v3.2.7`、`3.2.7` 和 `3.2`。
 
 首次发布后，仓库所有者需在 GitHub 的 `chatgpt3api` Package settings 中将可见性设置为 Public，服务器才能匿名拉取；未公开时需使用具有 `read:packages` 权限的凭据登录 GHCR。参见 [GitHub Container registry 文档](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)。在线更新使用本仓库的 GitHub Release。
